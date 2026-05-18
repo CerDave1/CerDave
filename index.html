@@ -782,17 +782,18 @@
 
         let hasPlayedOnScroll = false;
 
-        function activateAudioOnGesture() {
+        function activateAudioOnGesture(event) {
             if (hasPlayedOnScroll || !clickSound) return;
-            if (window.scrollY <= 5) return;
+            const isScrollGesture = event && (event.type === 'scroll' || event.type === 'wheel');
+            if (isScrollGesture && window.scrollY <= 5) return;
             hasPlayedOnScroll = true;
             if (!soundEnabled) return;
             clickSound.muted = false;
             clickSound.volume = 0.35;
             clickSound.play().then(() => {
-                console.log('Audio playing after scroll gesture.');
+                console.log('Audio playing after user gesture.');
             }).catch((error) => {
-                console.warn('Play failed after scroll gesture.', error);
+                console.warn('Play failed after user gesture.', error);
             });
             removeGestureListeners();
         }
@@ -802,13 +803,15 @@
             window.removeEventListener('wheel', activateAudioOnGesture);
             window.removeEventListener('touchstart', activateAudioOnGesture);
             window.removeEventListener('keydown', activateAudioOnGesture);
+            window.removeEventListener('click', activateAudioOnGesture);
         }
 
         window.addEventListener('load', tryStartMutedPlayback);
-        window.addEventListener('scroll', activateAudioOnGesture);
-        window.addEventListener('wheel', activateAudioOnGesture);
-        window.addEventListener('touchstart', activateAudioOnGesture);
-        window.addEventListener('keydown', activateAudioOnGesture);
+        window.addEventListener('scroll', activateAudioOnGesture, { passive: true });
+        window.addEventListener('wheel', activateAudioOnGesture, { passive: true });
+        window.addEventListener('touchstart', activateAudioOnGesture, { passive: true });
+        window.addEventListener('keydown', activateAudioOnGesture, { passive: true });
+        window.addEventListener('click', activateAudioOnGesture, { passive: true });
 
         // Volume Toggle Mechanism UI Hook
         const audioBtn = document.getElementById('audioBtn');
